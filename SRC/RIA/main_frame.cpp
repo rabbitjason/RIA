@@ -455,16 +455,19 @@ CControlUI* MainFrame::CreateControl(LPCTSTR pstrClass)
 void MainFrame::OnFinalMessage(HWND hWnd)
 {
 	WindowImplBase::OnFinalMessage(hWnd);
+
     if (m_pchrFileBuffer)
     {
         delete[] m_pchrFileBuffer;
         m_pchrFileBuffer = NULL;
     }
+
     if (m_hRegKey)
     {
         ::RegCloseKey(m_hRegKey);
         m_hRegKey = NULL;
     }
+
     if (m_hAiEngine)
     {
         m_AiEngine.aiengine_delete(m_hAiEngine);
@@ -1666,6 +1669,8 @@ void MainFrame::InitWindow()
     DWORD dwErr;
     CString strErr = _T("");
 
+    m_hAiEngine = NULL;
+
     DuiLib::CWaitCursor cw;
     do 
     {
@@ -1751,8 +1756,10 @@ void MainFrame::InitWindow()
             }
         }
 
-        m_hAiEngine = NULL;
-        dwErr = m_AiEngine.LoadFunc();
+        dwErr = m_ssEvalMgr.Open();
+
+        //m_hAiEngine = NULL;
+        //dwErr = m_AiEngine.LoadFunc();
 #ifndef APP_DEMO 
 //#if 0
         if (ERROR_SUCCESS != dwErr)
@@ -1760,48 +1767,51 @@ void MainFrame::InitWindow()
             strErr.Format(_T("语音识别引擎加载失败：%s"), MyFormatMessage(dwErr));
             break;
         }
-        if (GetAiEngineSN() != 0)
-        {
-            break;
-        }
 
-        TRACE(_T("尝试采用新语音识别引擎。\n"));
-        char data[AI_DAT_LEN + 1] = {'\0'};
-        m_AiEngine.aiengine_opt(NULL, CAiEngine::AIENGINE_OPT_GET_VERSION, (LPBYTE)data, AI_DAT_LEN);
-        TRACE("ai version:%s\n", (const char*)data);
-        CString strTmp, strSerialSpeech = RegKeyGetValue(_T("SpeechSerial"));
-        //strTmp.Format(_T("{\"appKey\":\"%s\",\"secretKey\": \"%s\", \"provision\": \"./assets/aiengine.provision\", \"serialNumber\": \"%s\",\"native\": {\"en.sent.score\":{\"res\": \"./resource/eval/bin/eng.snt.splp.0.10\"}}}"),
-        //    (LPCTSTR)CA2T(m_AiEngine.m_appKey), (LPCTSTR)CA2T(m_AiEngine.m_secretKey), strSerialSpeech);
-        strTmp.Format(_T("\
-{\
-    \"appKey\": \"%s\",\
-    \"secretKey\": \"%s\",\
-    \"provision\": \"assets/aiengine.provision\",\
-    \"native\": {\
-        \"en.word.score\": {\
-            \"res\": \"resource/eval/bin/eng.wrd.g4.P2.0.4\"\
-        },\
-        \"en.sent.score\": {\
-            \"res\": \"resource/eval/bin/eng.snt.g4.P2.0.7\"\
-        },\
-        \"en.pred.exam\": {\
-            \"res\": \"resource/exam/bin/eng.pred.aux.P3.V4.11\"\
-        }\
-    }\
-}"),  (LPTSTR)CA2T(m_AiEngine.m_appKey), (LPTSTR)CA2T(m_AiEngine.m_secretKey));
-        TRACE(_T("AiEngine cfg:%s\n"), strTmp);
-        TRACE(_T("SpeechSerial:%s\n"), strSerialSpeech);
-        m_hAiEngine = m_AiEngine.aiengine_new(CT2A(strTmp));
-        TRACE(_T("aiengine_new return %p\n"), m_hAiEngine);
-        TRACE(_T("采用新语音识别引擎:%s\n"),
-            m_hAiEngine ? _T("成功") : _T("失败"));
-        if (NULL == m_hAiEngine)
-        {
-            strErr = _T("创建语音识别引擎实例失败。");
-#ifndef _DEBUG
-            break;
-#endif
-        }
+        m_ssEvalMgr.SetEvalCallback(this);
+
+//        if (GetAiEngineSN() != 0)
+//        {
+//            break;
+//        }
+//
+//        TRACE(_T("尝试采用新语音识别引擎。\n"));
+//        char data[AI_DAT_LEN + 1] = {'\0'};
+//        m_AiEngine.aiengine_opt(NULL, CAiEngine::AIENGINE_OPT_GET_VERSION, (LPBYTE)data, AI_DAT_LEN);
+//        TRACE("ai version:%s\n", (const char*)data);
+//        CString strTmp, strSerialSpeech = RegKeyGetValue(_T("SpeechSerial"));
+//        //strTmp.Format(_T("{\"appKey\":\"%s\",\"secretKey\": \"%s\", \"provision\": \"./assets/aiengine.provision\", \"serialNumber\": \"%s\",\"native\": {\"en.sent.score\":{\"res\": \"./resource/eval/bin/eng.snt.splp.0.10\"}}}"),
+//        //    (LPCTSTR)CA2T(m_AiEngine.m_appKey), (LPCTSTR)CA2T(m_AiEngine.m_secretKey), strSerialSpeech);
+//        strTmp.Format(_T("\
+//{\
+//    \"appKey\": \"%s\",\
+//    \"secretKey\": \"%s\",\
+//    \"provision\": \"assets/aiengine.provision\",\
+//    \"native\": {\
+//        \"en.word.score\": {\
+//            \"res\": \"resource/eval/bin/eng.wrd.g4.P2.0.4\"\
+//        },\
+//        \"en.sent.score\": {\
+//            \"res\": \"resource/eval/bin/eng.snt.g4.P2.0.7\"\
+//        },\
+//        \"en.pred.exam\": {\
+//            \"res\": \"resource/exam/bin/eng.pred.aux.P3.V4.11\"\
+//        }\
+//    }\
+//}"),  (LPTSTR)CA2T(m_AiEngine.m_appKey), (LPTSTR)CA2T(m_AiEngine.m_secretKey));
+//        TRACE(_T("AiEngine cfg:%s\n"), strTmp);
+//        TRACE(_T("SpeechSerial:%s\n"), strSerialSpeech);
+//        m_hAiEngine = m_AiEngine.aiengine_new(CT2A(strTmp));
+//        TRACE(_T("aiengine_new return %p\n"), m_hAiEngine);
+//        TRACE(_T("采用新语音识别引擎:%s\n"),
+//            m_hAiEngine ? _T("成功") : _T("失败"));
+//        if (NULL == m_hAiEngine)
+//        {
+//            strErr = _T("创建语音识别引擎实例失败。");
+//#ifndef _DEBUG
+//            break;
+//#endif
+//        }
 #endif
 
         int i;
@@ -1934,7 +1944,7 @@ void MainFrame::InitWindow()
         }
 
 #ifdef _DEBUG
-        SpeakAndWait(_T("test voice, can you here the?"));
+        SpeakAndWait(_T("test voice, can you here then?"));
 #endif
 
 #if 1
@@ -4782,6 +4792,9 @@ LRESULT MainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, 
                         {
                             nStart = Stat.ulInputWordPos + m_nReadCurrentCursor;
                             nEnd = nStart + Stat.ulInputWordLen;
+
+
+
                             CRichEditUI* pREdt = xFindControl(CRichEditUI, _T("readcontenttxt"));
                             pREdt->SetSel(nStart, nEnd);
 
@@ -13481,7 +13494,14 @@ HRESULT MainFrame::SpeechRecognition_Stop()
     //}
     HRESULT Hr = S_OK;
 
-    if (m_hAiEngine)
+    //if (m_hAiEngine)
+    //{
+    //    TRACE(_T("使用新语音识别引擎,do nothing here。\n"));
+    //    SendMessage(WM_SRENDSTREAM);
+    //    return Hr;
+    //}
+
+    if (m_ssEvalMgr.IsOpen())
     {
         TRACE(_T("使用新语音识别引擎,do nothing here。\n"));
         SendMessage(WM_SRENDSTREAM);
@@ -13633,10 +13653,16 @@ int MainFrame::SpeechRecognitionCompare(const CString& strSpokenText, CString& s
     return 0;
 #endif
 
-    if (m_hAiEngine)
+    //if (m_hAiEngine)
+    //{
+    //    TRACE(_T("使用新语音识别引擎\n"));
+    //    return SpeechRecognitionCompare2(strSpokenText, strErrMsg, nCoreType);
+    //}
+
+    if (m_ssEvalMgr.IsOpen())
     {
-        TRACE(_T("使用新语音识别引擎\n"));
-        return SpeechRecognitionCompare2(strSpokenText, strErrMsg, nCoreType);
+        TRACE(_T("使用先声语音识别引擎\n"));
+        return SingSoundPronEval(strSpokenText, strErrMsg, nCoreType);
     }
 
     CString strTmp, strLoclSrc;
@@ -13805,6 +13831,271 @@ int MainFrame::SpeechRecognitionCompare(const CString& strSpokenText, CString& s
 //    m_strRecognitionCompare[8].Format(_T("%d"), 0);
 //#endif
     return 0;
+}
+
+void MainFrame::OnEvalReply(const char *id, int nType, const void *lpMessage, int nSize)
+{
+    TRACE("type:%d, size:%d\n", nType, nSize);
+    if (nType == SSOUND_MESSAGE_TYPE_JSON)
+    {
+        m_strRecognitionCompare[8].Format(_T("%d"), -1);
+        m_strRecognitionCompare[7].Empty();
+        m_strRecognitionCompare[11].Empty();
+
+        do 
+        {
+            Json::Reader jreader;
+            Json::Value jroot;
+            //CA2W wMsg((LPCSTR)lpMessage);
+            //int nLen = AtlUnicodeToUTF8(wMsg, -1, NULL, 0);//::WideCharToMultiByte(CP_UTF8, 0, wMsg, -1, NULL, 0, NULL, NULL);
+            //string sJson;
+            //sJson.resize(nLen);
+            //nLen = AtlUnicodeToUTF8(wMsg, -1, &sJson[0], nLen);//::WideCharToMultiByte(CP_UTF8, 0, wMsg, -1, &sJson[0], nLen, NULL, NULL);
+            string sJson = (LPCSTR)lpMessage;
+//#ifdef _DEBUG
+//            m_flog->WriteString(_T("Reftext:\n"));
+//            m_flog->WriteString(pFrame->m_strAiRefText);
+//            m_flog->WriteString(_T("\n"));
+//            m_flog->WriteString(_T("Result:\n"));
+//            m_flog->WriteString((LPTSTR)CA2T((LPCSTR)lpMessage));
+//            m_flog->WriteString(_T("\n\n"));
+//#endif
+            TRACE("Json:%s\n", sJson.c_str());
+            if (!jreader.parse(sJson.c_str(), jroot))
+            {
+                m_strAiErrMsg = _T("语音识别返回数据格式错误。");
+                break;
+            }
+            //TRACE("version:%s,recordId:%s\n", jroot["version"].asCString(), jroot["tokenId"].asCString());
+            Json::Value jresult = jroot["result"];
+            if (jresult.isNull())
+            {
+                //{"errId": 70200, "error": "Network abnormal.", "tokenId": "565fd9ec02dbc2158c000001" }
+                Json::Value jerrid = jroot["errId"];
+                if (!jerrid.isNull())
+                {
+                    m_strRecognitionCompare[8].Format(_T("%d"), -2);
+                    TRACE(_T("errorid:%d\n"), jerrid.asInt());
+                }
+                Json::Value jerror = jroot["error"];
+#ifdef _DEBUG
+                if (!jerror.isNull())
+                {
+                    TRACE("Json error:%s\n", jerror.asCString());
+                }
+#endif
+
+                if (!jerrid.isNull() && !jerror.isNull())
+                {
+                    //UTF8==>unicode
+                    m_strAiErrMsg.Format(_T("语音识别失败，错误码：%d，错误描述：%s。请联系客服人员。"),
+                        jerrid.asInt(), (LPTSTR)CA2T(jerror.asCString()));
+                    //if (jerrid.asInt() == 60015)
+                    //{
+                    //    m_strAiErrMsg = _T("语音识别失败，请重新启动程序。");
+                    //    RegKeySetValue(REG_SpeechSerial, _T(""));
+                    //    //并删除%ProgramData%/aiengine/udidinfo
+                    //    TCHAR szPath[1024] = {_T('\0'),};
+                    //    if (SUCCEEDED(::SHGetFolderPath(pFrame->GetHWND(),
+                    //        CSIDL_COMMON_APPDATA, NULL, SHGFP_TYPE_CURRENT, szPath)))
+                    //    {
+                    //        ::PathAppend(szPath, _T("aiengine"));
+                    //        TRACE(_T("sn failed, delete %s\n"), szPath);
+                    //        MyRemoveDir(szPath);
+                    //    }
+                    //}
+                }
+                break;
+            }
+            //得分，在识别结果为0（成功情况下）
+            Json::Value jOverall = jresult["overall"];
+            if (jOverall.isNull())
+            {
+                m_strAiErrMsg = _T("语音识别失败，无结果。");
+                break;
+            }
+            TRACE("\noverall:%d\n", jOverall.asInt());
+            m_strRecognitionCompare[8].Format(_T("%d"), jOverall.asInt());
+#ifdef _DEBUG
+            //if (jOverall.asInt() < 50)
+            {
+                Json::Value jinfo = jresult["info"];
+                if (!jinfo.isNull())
+                {
+                    TRACE("tipId:%d\n", jinfo["tipId"].asUInt());
+                    if (jinfo["tipId"].asUInt() != 0)
+                    {
+                        TRACE(_T("tips:%s\n"), SSEvalMgr::GetErrMsg(jinfo["tipId"].asUInt()).c_str());
+                        //break;
+                    }
+                }
+            }
+#endif
+
+            Json::Value jdetails = jresult["details"];
+            if (jdetails.isNull())
+            {
+                TRACE(_T("has no details!!\n"));
+                break;
+            }
+            Json::UInt i = 0, count = jdetails.size();
+            if (count <= 0)
+            {
+                TRACE(_T("has %d details!!\n"), count);
+                break;
+            }
+            CString strWords;
+            Json::Value ele;
+            Json::Value score;
+            Json::Value jchar;
+            Json::Value jtext;
+            m_aReadbadWord.clear();
+            if (MainFrame::ct_pred == m_nAiCoreType)
+            {
+                for (i = 0; i < count; i++)
+                {
+                    ele = jdetails[i];
+                    score = ele["score"];
+                    jtext = ele["text"];
+                    if (score.isNull() ||
+                        jtext.isNull())
+                    {
+                        continue;
+                    }
+                    m_aReadbadWord.push_back(MyBadWord(score.asUInt(), (LPTSTR)CA2T(jtext.asCString())));
+                }
+            }
+            else if (MainFrame::ct_sent == m_nAiCoreType)
+            {
+                for (i = 0; i < count; i++)
+                {
+                    //得分<=80情况下，单词未识别
+                    ele = jdetails[i];
+                    score = ele["score"];
+                    jchar = ele["char"];
+                    if (jchar.isNull() ||
+                        score.isNull())
+                    {
+                        continue;
+                    }
+                    //TRACE("%d: score:%d, char:%s\n", i+1, ele["score"].asUInt(), ele["char"].asCString());
+                    if (ele["score"].asUInt() <= 80)
+                    {
+                        strWords += (LPTSTR)CA2T(jchar.asCString());
+                        strWords += _T(" ");
+                        TRACE(_T("%s is bad:%d\n"), (LPTSTR)CA2T(jchar.asCString()), ele["score"].asUInt());
+                    }
+                    m_aReadbadWord.push_back(MyBadWord(score.asUInt(), (LPTSTR)CA2T(jchar.asCString())));
+                }
+                strWords.TrimRight(_T(' '));
+                m_strRecognitionCompare[7] = strWords;
+            }
+            else if (MainFrame::ct_word == m_nAiCoreType)
+            {
+                i = 0;
+                Json::Value ele = jdetails[i];
+                Json::Value phone = ele["phone"];
+                if (!phone.isNull())
+                {
+                    count = phone.size();
+                    for (i = 0; i < count; i++)
+                    {
+                        score = phone[i]["score"];
+                        jchar = phone[i]["char"];
+                        if (jchar.isNull() ||
+                            score.isNull())
+                        {
+                            continue;
+                        }
+                        m_aReadbadWord.push_back(MyBadWord(score.asUInt(), (LPTSTR)CA2T(jchar.asCString())));
+                    }
+                }
+#ifdef _DEBUG
+                else
+                {
+                    TRACE(_T("单词没有音素评分结果！\n"));
+                }
+#endif
+            }
+            else
+            {
+                ;
+            }
+
+#if 0       //只有单词才有音素的评分
+            Json::Value jstatics = jresult["statics"];
+            count = jstatics.size();
+            strWords.Empty();
+            for (i = 0; i < count; i++)
+            {
+                //得分<=80情况下，音标未识别
+                Json::Value ele = jstatics[i];
+                //TRACE("%d: score:%d, char:%s\n", i+1, ele["score"].asUInt(), ele["char"].asCString());
+                if (ele["score"].asUInt() <= 80)
+                {
+                    strWords += (LPTSTR)CA2T(ele["char"].asCString());
+                    strWords += _T(",");
+                }
+            }
+            strWords.TrimRight(_T(','));
+            pFrame->m_strRecognitionCompare[11] = strWords;
+#endif
+        } while (FALSE);
+
+        //pFrame->m_bAICompleted = true;
+        //SetEventState(TRUE);
+        //TRACE(_T("callback out, set m_bAICompleted %d\n"), IsCallbackQuit());
+    }
+}
+
+int MainFrame::SingSoundPronEval(const CString& strSpokenText, CString& strErrMsg, SRCoreType nCoreType /* = ct_sent */)
+{
+    int nRet = 0;
+    CString strTmp, strSrc = strSpokenText;
+    //CString strSpeechSN = RegKeyGetValue(REG_SpeechSerial);
+    TCHAR szId[64] = {0};
+    strErrMsg.Empty();
+    do 
+    {
+        ASSERT(nCoreType < ct_max);
+        if (strSrc.IsEmpty())
+        {
+            nRet = 1;
+            strErrMsg = _T("参考语句为空。");
+            break;
+        }
+
+        if (ct_pred == nCoreType)
+        {
+            nRet = m_ssEvalMgr.EvalPred( m_strCommonWaveFile, strSpokenText, szId );
+        } else if (ct_sent == nCoreType)
+        {
+            nRet = m_ssEvalMgr.EvalSentence( m_strCommonWaveFile, strSpokenText, szId );
+        } else if (ct_word == nCoreType)
+        {
+            nRet = m_ssEvalMgr.EvalWord( m_strCommonWaveFile, strSpokenText, szId );
+        }
+
+        if (-1 == nRet)
+        {
+            strErrMsg.Format(_T("打开录音文件失败：%s"), m_strCommonWaveFile.GetString());
+        } else if (-2 == nRet)
+        {
+            strErrMsg = _T("无法完成语音识别，请重新启动程序。");
+        }
+
+        CMFCDlgSR DlgSr(this);
+        DlgSr.DoModal();
+
+        if (!m_strAiErrMsg.IsEmpty())
+        {
+            strErrMsg = m_strAiErrMsg;
+            nRet = -3;
+        }
+
+    } while (FALSE);
+
+    return nRet;
 }
 
 int MainFrame::SpeechRecognitionCompare2(const CString& strSpokenText, CString& strErrMsg, SRCoreType nCoreType/* = ct_sent*/)

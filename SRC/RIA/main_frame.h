@@ -8,6 +8,8 @@
 #ifndef MAINFRAME_HPP
 #define MAINFRAME_HPP
 
+#include "SSEvalMgr.h"
+
 class CMyWndUI : public CControlUI
 {
 public:
@@ -336,7 +338,7 @@ typedef map<CDuiString,WORD>    SkinMap;
 #endif
 #endif
 
-class MainFrame : public WindowImplBase//, public IListCallbackUI
+class MainFrame : public WindowImplBase, IEvalSink //, public IListCallbackUI
 {
 public:
 
@@ -530,6 +532,11 @@ protected:
 
     MyWndContainer  m_AllMyWnd;
     void KillAllTimer();
+
+    //先声测评接口
+    SSEvalMgr m_ssEvalMgr;
+    void OnEvalReply(const char *id, int type, const void *message, int size);
+    int  SingSoundPronEval(const CString& strSpokenText, CString& strErrMsg, SRCoreType nCoreType = ct_sent);
 
     //主界面
     void OnPrepareMain();

@@ -264,8 +264,9 @@ void CMFCDlgSR::OnTimer(UINT_PTR nIDEvent)
     // TODO: Add your message handler code here and/or call default
     if (nIDEvent == 100)
     {
-        TRACE(_T("m_pParent->m_bAICompleted:%d\n"), m_pParent->m_AiEngine.IsCallbackQuit());
-        if (m_pParent->m_AiEngine.IsCallbackQuit())
+        //TRACE(_T("m_pParent->m_bAICompleted:%d\n"), m_pParent->m_AiEngine.IsCallbackQuit());
+        //if (m_pParent->m_AiEngine.IsCallbackQuit())
+        if (m_pParent->m_ssEvalMgr.EvalIsCompleted())
         {
             KillTimer(nIDEvent);
             EndDialog(IDOK);

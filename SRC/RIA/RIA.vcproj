@@ -481,6 +481,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SSEvalMgr.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -530,6 +534,10 @@
 			</File>
 			<File
 				RelativePath=".\translateword.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utility.cpp"
 				>
 			</File>
 			<File
@@ -907,6 +915,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IEvalSink.h"
+				>
+			</File>
+			<File
 				RelativePath=".\listen_voice.h"
 				>
 			</File>
@@ -959,6 +971,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SSEvalMgr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ssound.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
@@ -980,6 +1000,10 @@
 			</File>
 			<File
 				RelativePath=".\translateword.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utility.h"
 				>
 			</File>
 			<File
