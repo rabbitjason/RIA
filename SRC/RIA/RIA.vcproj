@@ -287,6 +287,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\Debug_Win8Skin\全记牢智能英语.exe ..\InstallPrj\Files\全记牢智能英语.exe /Y"
 			/>
 		</Configuration>
 		<Configuration

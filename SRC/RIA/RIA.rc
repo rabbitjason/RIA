@@ -78,8 +78,8 @@ IDR_MAINFRAME           ICON                    "res\\RIA.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,2,3
- PRODUCTVERSION 3,7,2,3
+ FILEVERSION 4,0,1,1
+ PRODUCTVERSION 4,0,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -96,13 +96,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "博士老爸智能英语"
             VALUE "CompanyName", "湖北纽云教育科技发展有限公司"
-            VALUE "FileDescription", "博士老爸智能英语"
-            VALUE "FileVersion", "3.7.2.3"
+            VALUE "FileDescription", "全记牢智能英语"
+            VALUE "FileVersion", "4, 0, 1, 1"
             VALUE "InternalName", "RIA.exe"
-            VALUE "LegalCopyright", "(C) 2015-2017 湖北纽云教育科技发展有限公司。保留所有权利。"
+            VALUE "LegalCopyright", "(C) 2015-2018 湖北纽云教育科技发展有限公司。保留所有权利。"
             VALUE "OriginalFilename", "RIA.exe"
-            VALUE "ProductName", "博士老爸智能英语"
-            VALUE "ProductVersion", "3.7.2.3"
+            VALUE "ProductName", "全记牢智能英语"
+            VALUE "ProductVersion", "4, 0, 1, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -148,6 +148,7 @@ BEGIN
     PUSHBUTTON      "取消(&C)",IDCANCEL,175,59,50,14
     LTEXT           "提示：名称不能为空，不可包含特殊字符，不可重复",IDC_STATIC,16,15,277,11
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

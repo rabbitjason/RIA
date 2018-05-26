@@ -3117,14 +3117,23 @@ void MainFrame::Notify(TNotifyUI& msg)
         }
         else if (strSender == kWordButtonName)
         {
-            OpenChildModalWnd(sWordSelectSkin);
+            //OpenChildModalWnd(sWordSelectSkin);
+            
+            //ShellExecute(GetHWND(), _T("open"), _T("WordExer.exe"),NULL,NULL,SW_SHOWNORMAL);
+            PROCESS_INFORMATION pi;  
+            STARTUPINFO si;  
+            memset(&si,0,sizeof(si));  
+            si.cb = sizeof(si);  
+            si.wShowWindow = SW_SHOW;  
+            si.dwFlags = STARTF_USESHOWWINDOW;
+            bool fRet = CreateProcess(_T("WordExer.dll"),NULL,NULL,FALSE ,NULL,NULL,NULL,NULL,&si,&pi); 
         }
         else if (strSender == kDialogButtonName)
         {
             OpenChildModalWnd(sDialogSelectSkin);
         }
         else if (strSender == kListenButtonName)
-        {
+        { 
             OpenChildModalWnd(sListenSelectSkin);
         }
         else if (strSender == kGrammarButtonName)
